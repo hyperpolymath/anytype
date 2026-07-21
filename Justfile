@@ -140,6 +140,8 @@ test *args:
     ./build/exec/anytype-tests
     idris2 --build anytype-cli.ipkg
     ./scripts/check-cli.sh
+    @command -v zig >/dev/null || { echo "FAIL: zig not on PATH (Zig seam tests need it)"; exit 1; }
+    cd src/interface/ffi && zig build test
 
 # Run tests with verbose output
 test-verbose:
