@@ -54,6 +54,8 @@ MANIFEST=(
   "src/interface|Abi/Foreign.idr|gated||ABI FFI declarations"
   ".machine_readable/coaptation/core|Coaptation.idr|gated||coaptation skeleton; compiles, semantically a placeholder"
   "verification/tests/kernel|Tests/Main.idr|gated|-p anytype|golden matrix; needs anytype installed (just test does this)"
+  "src/cli|Anytype/Sexp.idr|gated|-p anytype|total S-expression reader for the seam wire format"
+  "src/cli|Anytype/Main.idr|gated|-p anytype -p anytype-abi|anytype-check entry point; exit codes = Abi.Types verdictCode"
   "verification/proofs/idris2|ABI/Foreign.idr|gated||the one template verification module that compiles"
   "verification/proofs/idris2|Types.idr|quarantine||RSR template stock, never compiled: LTE needs Data.Nat"
   "verification/proofs/idris2|ABI/Platform.idr|quarantine||template stock: LTE needs Data.Nat, then undefined lteRefl"

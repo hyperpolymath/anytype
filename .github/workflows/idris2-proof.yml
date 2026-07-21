@@ -1,0 +1,95 @@
+# SPDX-License-Identifier: MPL-2.0
+# Idris2 proof + kernel test gate — type-checks EVERY Idris2 module via
+# scripts/check-idris2-proofs.sh (the same script `just proof-check-idris2`
+# runs, so local green and CI green mean the same thing), then builds the
+# kernel and runs the golden matrix (the same pipeline as `just test`).
+#
+# This is the first workflow in this repository that checks any Idris2 at
+# all: the other workflows validate repo shape and run security scanners,
+# and the recipe this gate replaces (build/just/proofs.just) exited 0 when
+# the prover was absent. The script fails when idris2 is missing rather
+# than skipping, so a broken install step can never render as a green
+# proof run.
+#
+# Adapted from ideas-to-alphas .github/workflows/idris2-proof.yml, which
+# documents the estate history behind each rule.
+name: Idris2 Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.idr'
+      - '*.ipkg'
+      - 'scripts/check-idris2-proofs.sh'
+      - 'scripts/check-cli.sh'
+      - '.github/workflows/idris2-proof.yml'
+  pull_request:
+    paths:
+      - '**.idr'
+      - '*.ipkg'
+      - 'scripts/check-idris2-proofs.sh'
+      - 'scripts/check-cli.sh'
+      - '.github/workflows/idris2-proof.yml'
+  workflow_dispatch:
+
+# Estate guardrail: one run per ref, cancel superseded runs. Read-only check.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  IDRIS2_VERSION: "0.7.0"
+
+jobs:
+  idris2-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install Chez Scheme (Idris2 backend)
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends chezscheme libgmp-dev
+
+      - name: Build & install Idris2 ${{ env.IDRIS2_VERSION }}
+        run: |
+          set -euo pipefail
+          # Build OUTSIDE the checkout. The proof gate sweeps the working tree
+          # for every *.idr and errors on any not in its manifest -- that
+          # breadth is the point. The Idris2 source tarball ships hundreds of
+          # .idr files; extracting it into the checkout makes the gate fail on
+          # the compiler's own sources. Keep the tree the gate scans clean.
+          build_dir="$(mktemp -d)"
+          cd "$build_dir"
+          tarball="idris2-${IDRIS2_VERSION}.tar.gz"
+          curl -fsSL -o "$tarball" \
+            "https://codeload.github.com/idris-lang/Idris2/tar.gz/refs/tags/v${IDRIS2_VERSION}"
+          tar xzf "$tarball"
+          cd "Idris2-${IDRIS2_VERSION}"
+          make bootstrap SCHEME=chezscheme
+          make install SCHEME=chezscheme
+          echo "${HOME}/.idris2/bin" >> "$GITHUB_PATH"
+
+      - name: Build kernel, run golden matrix and seam tests
+        # Runs first so the anytype/anytype-abi packages are installed before
+        # the proof sweep checks modules that use -p flags.
+        run: |
+          set -euo pipefail
+          idris2 --install anytype.ipkg
+          idris2 --install abi.ipkg
+          idris2 --build anytype-tests.ipkg
+          ./build/exec/anytype-tests
+          idris2 --build anytype-cli.ipkg
+          ./scripts/check-cli.sh
+
+      - name: Type-check every Idris2 module
+        run: ./scripts/check-idris2-proofs.sh

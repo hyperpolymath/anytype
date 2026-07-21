@@ -134,10 +134,12 @@ clean-all: clean
 # Typecheck the ABI seam, build the kernel, run the golden matrix
 test *args:
     @command -v idris2 >/dev/null || { echo "FAIL: idris2 not on PATH (install Idris2 0.7.0)"; exit 1; }
-    idris2 --typecheck abi.ipkg
     idris2 --install anytype.ipkg
+    idris2 --install abi.ipkg
     idris2 --build anytype-tests.ipkg
     ./build/exec/anytype-tests
+    idris2 --build anytype-cli.ipkg
+    ./scripts/check-cli.sh
 
 # Run tests with verbose output
 test-verbose:

@@ -1,0 +1,1 @@
+(parameterize ([optimize-level 3] [compile-file-message #f]) (compile-program "/home/hyperpolymath/developer/hyper-repos/_LANGUAGES _SET/anytype/.claude/worktrees/anytype-mvp-kernel/build/exec/anytype-check_app/anytype-check.ss"))

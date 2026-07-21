@@ -1,112 +1,72 @@
 -- SPDX-License-Identifier: MPL-2.0
 -- Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-||| ABI Type Definitions Template
+||| anytype ABI wire types.
 |||
-||| This module defines the Application Binary Interface (ABI) for this library.
-||| All type definitions include formal proofs of correctness.
-
+||| This module used to be the RSR template's generic ABI demo; it now
+||| defines anytype's actual seam surface: the discipline selector and
+||| the verdict a kernel check returns, with machine-checked facts about
+||| their byte encodings (codes are injective and decoding inverts
+||| encoding, so the Zig side can trust a reverse lookup).
 module Abi.Types
-
-import Data.Bits
-import Data.So
-import Data.Vect
-import Decidable.Equality
 
 %default total
 
---------------------------------------------------------------------------------
--- Platform Model
---------------------------------------------------------------------------------
-
-||| Target platforms for the FFI bridge
+||| Which grade algebra the kernel should check under.
 public export
-data Platform = Linux | MacOS | Windows | WASM | RISCV
+data Discipline = DAffine | DExact
 
-||| Pointer size in bits per platform
+||| Wire encoding of a discipline.
 public export
-ptrSize : Platform -> Nat
-ptrSize Linux = 64
-ptrSize MacOS = 64
-ptrSize Windows = 64
-ptrSize WASM = 32
-ptrSize RISCV = 64
+disciplineCode : Discipline -> Bits8
+disciplineCode DAffine = 0
+disciplineCode DExact = 1
 
-||| Current target platform (detected at compile-time)
+||| The result of a kernel check, as seen across the ABI.
 public export
-thisPlatform : Platform
-thisPlatform = Linux -- Simplified for template
+data Verdict = VAccepted | VRejected | VIllFormed
 
---------------------------------------------------------------------------------
--- Core Types
---------------------------------------------------------------------------------
-
-||| Return codes for FFI calls
+||| Wire encoding of a verdict.
 public export
-data Result = Ok | Error | InvalidParam | Busy
+verdictCode : Verdict -> Bits8
+verdictCode VAccepted = 0
+verdictCode VRejected = 1
+verdictCode VIllFormed = 2
 
-||| Results are decidably equal
+||| Decode a discipline byte (total; out-of-range is Nothing).
 public export
-implementation DecEq Result where
-  decEq Ok Ok = Yes Refl
-  decEq Error Error = Yes Refl
-  decEq InvalidParam InvalidParam = Yes Refl
-  decEq Busy Busy = Yes Refl
-  decEq Ok Error = No (\case Refl impossible)
-  decEq Ok InvalidParam = No (\case Refl impossible)
-  decEq Ok Busy = No (\case Refl impossible)
-  decEq Error Ok = No (\case Refl impossible)
-  decEq Error InvalidParam = No (\case Refl impossible)
-  decEq Error Busy = No (\case Refl impossible)
-  decEq InvalidParam Ok = No (\case Refl impossible)
-  decEq InvalidParam Error = No (\case Refl impossible)
-  decEq InvalidParam Busy = No (\case Refl impossible)
-  decEq Busy Ok = No (\case Refl impossible)
-  decEq Busy Error = No (\case Refl impossible)
-  decEq Busy InvalidParam = No (\case Refl impossible)
+disciplineOfCode : Bits8 -> Maybe Discipline
+disciplineOfCode 0 = Just DAffine
+disciplineOfCode 1 = Just DExact
+disciplineOfCode _ = Nothing
 
-||| Opaque handle for library resources
-||| Invariant: Handle pointer must be non-null
+-- Machine-checked encoding facts -------------------------------------------
+
+||| Discipline codes are injective.
 public export
-record Handle where
-  constructor MkHandle
-  ptr : Bits64
-  0 prf : So (ptr /= 0)
+disciplineCodeInjective : (d1, d2 : Discipline) ->
+                          disciplineCode d1 = disciplineCode d2 -> d1 = d2
+disciplineCodeInjective DAffine DAffine _ = Refl
+disciplineCodeInjective DExact DExact _ = Refl
+disciplineCodeInjective DAffine DExact Refl impossible
+disciplineCodeInjective DExact DAffine Refl impossible
 
-||| Returns Nothing if pointer is null
+||| Verdict codes are injective.
 public export
-createHandle : Bits64 -> Maybe Handle
-createHandle 0 = Nothing
-createHandle ptr = case decSo (ptr /= 0) of
-  Yes p => Just (MkHandle ptr p)
-  No _ => Nothing
+verdictCodeInjective : (v1, v2 : Verdict) ->
+                       verdictCode v1 = verdictCode v2 -> v1 = v2
+verdictCodeInjective VAccepted VAccepted _ = Refl
+verdictCodeInjective VRejected VRejected _ = Refl
+verdictCodeInjective VIllFormed VIllFormed _ = Refl
+verdictCodeInjective VAccepted VRejected Refl impossible
+verdictCodeInjective VAccepted VIllFormed Refl impossible
+verdictCodeInjective VRejected VAccepted Refl impossible
+verdictCodeInjective VRejected VIllFormed Refl impossible
+verdictCodeInjective VIllFormed VAccepted Refl impossible
+verdictCodeInjective VIllFormed VRejected Refl impossible
 
---------------------------------------------------------------------------------
--- C-Types Mapping
---------------------------------------------------------------------------------
-
-||| Tagged types for C-FFI boundary
+||| Decoding inverts encoding.
 public export
-data CType = CInt | CUInt | CLong | CULong | CPtrType
-
-||| Pointer type for platform
-public export
-CPtr : Platform -> CType -> Type
-CPtr p _ = Bits64 -- Simplified for 64-bit template
-
-||| Size of C types (platform-specific)
-public export
-cSizeOf : (p : Platform) -> (t : CType) -> Nat
-cSizeOf p CInt = 4
-cSizeOf p CUInt = 4
-cSizeOf p CLong = 8
-cSizeOf p CULong = 8
-cSizeOf p CPtrType = 8
-
-||| Alignment of C types (platform-specific)
-public export
-cAlignOf : (p : Platform) -> (t : CType) -> Nat
-cAlignOf p CInt = 4
-cAlignOf p CUInt = 4
-cAlignOf p CLong = 8
-cAlignOf p CULong = 8
-cAlignOf p CPtrType = 8
+disciplineRoundTrip : (d : Discipline) ->
+                      disciplineOfCode (disciplineCode d) = Just d
+disciplineRoundTrip DAffine = Refl
+disciplineRoundTrip DExact = Refl
