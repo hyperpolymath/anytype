@@ -1,275 +1,140 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-// {{PROJECT}} FFI Implementation
+// anytype FFI: the Zig side of the seam.
 //
-// This module implements the C-compatible FFI declared in src/abi/Foreign.idr
-// All types and layouts must match the Idris2 ABI definitions.
-//
+// Exports `anytype_check`, the C symbol declared in src/interface/Abi/
+// Foreign.idr. The MVP transport is a spawned `anytype-check` process
+// (see README.adoc); in-process linkage of the Idris2 kernel is future
+// work. Wire structs are comptime-asserted against the layouts proven
+// CABICompliant in src/interface/Abi/Layout.idr — if either side edits
+// a layout, one of the two gates fails.
 
 const std = @import("std");
 
-// Version information (keep in sync with project)
-const VERSION = "0.1.0";
-const BUILD_INFO = "{{PROJECT}} built with Zig " ++ @import("builtin").zig_version_string;
+/// Verdict codes — must match Abi.Types.verdictCode (proven injective
+/// on the Idris side).
+pub const VERDICT_ACCEPTED: u8 = 0;
+pub const VERDICT_REJECTED: u8 = 1;
+pub const VERDICT_ILLFORMED: u8 = 2;
 
-/// Thread-local error storage
-threadlocal var last_error: ?[]const u8 = null;
-
-/// Set the last error message
-fn setError(msg: []const u8) void {
-    last_error = msg;
-}
-
-/// Clear the last error
-fn clearError() void {
-    last_error = null;
-}
-
-//==============================================================================
-// Core Types (must match src/abi/Types.idr)
-//==============================================================================
-
-/// Result codes (must match Idris2 Result type)
-pub const Result = enum(c_int) {
-    ok = 0,
-    @"error" = 1,
-    invalid_param = 2,
-    out_of_memory = 3,
-    null_pointer = 4,
+/// Mirrors Abi.Layout.requestLayout: size 16, align 8,
+/// discipline@0, term_len@4, term_utf8@8.
+pub const anytype_request_t = extern struct {
+    discipline: u8,
+    term_len: u32,
+    term_utf8: [*:0]const u8,
 };
 
-/// Library handle (opaque to prevent direct access)
-pub const Handle = opaque {
-    // Internal state hidden from C
-    allocator: std.mem.Allocator,
-    initialized: bool,
-    // Add your fields here
+/// Mirrors Abi.Layout.responseLayout: size 16, align 8,
+/// verdict@0, msg_len@4, msg_utf8@8.
+pub const anytype_response_t = extern struct {
+    verdict: u8,
+    msg_len: u32,
+    msg_utf8: [*:0]const u8,
 };
 
-//==============================================================================
-// Library Lifecycle
-//==============================================================================
-
-/// Initialize the library
-/// Returns a handle, or null on failure
-export fn {{project}}_init() ?*Handle {
-    const allocator = std.heap.c_allocator;
-
-    const handle = allocator.create(Handle) catch {
-        setError("Failed to allocate handle");
-        return null;
-    };
-
-    // Initialize handle
-    handle.* = .{
-        .allocator = allocator,
-        .initialized = true,
-    };
-
-    clearError();
-    return handle;
+comptime {
+    // These numbers are the ones proven in Abi.Layout; a drift on either
+    // side breaks the corresponding gate.
+    std.debug.assert(@sizeOf(anytype_request_t) == 16);
+    std.debug.assert(@alignOf(anytype_request_t) == 8);
+    std.debug.assert(@offsetOf(anytype_request_t, "discipline") == 0);
+    std.debug.assert(@offsetOf(anytype_request_t, "term_len") == 4);
+    std.debug.assert(@offsetOf(anytype_request_t, "term_utf8") == 8);
+    std.debug.assert(@sizeOf(anytype_response_t) == 16);
+    std.debug.assert(@alignOf(anytype_response_t) == 8);
+    std.debug.assert(@offsetOf(anytype_response_t, "verdict") == 0);
+    std.debug.assert(@offsetOf(anytype_response_t, "msg_len") == 4);
+    std.debug.assert(@offsetOf(anytype_response_t, "msg_utf8") == 8);
 }
 
-/// Free the library handle
-export fn {{project}}_free(handle: ?*Handle) void {
-    const h = handle orelse return;
-    const allocator = h.allocator;
-
-    // Clean up resources
-    h.initialized = false;
-
-    allocator.destroy(h);
-    clearError();
+fn disciplineName(code: u8) ?[]const u8 {
+    // Must match Abi.Types.disciplineCode.
+    return switch (code) {
+        0 => "affine",
+        1 => "exact",
+        else => null,
+    };
 }
 
-//==============================================================================
-// Core Operations
-//==============================================================================
+/// Run one kernel check by spawning `bin` and speaking the seam
+/// protocol: term on stdin, verdict as exit code (= verdictCode).
+pub fn checkWith(
+    io: std.Io,
+    bin: []const u8,
+    discipline: u8,
+    term: []const u8,
+) u8 {
+    const disc = disciplineName(discipline) orelse return VERDICT_ILLFORMED;
 
-/// Process data (example operation)
-export fn {{project}}_process(handle: ?*Handle, input: u32) Result {
-    const h = handle orelse {
-        setError("Null handle");
-        return .null_pointer;
-    };
+    var child = std.process.spawn(io, .{
+        .argv = &.{ bin, "--discipline", disc },
+        .stdin = .pipe,
+        .stdout = .ignore,
+        .stderr = .ignore,
+    }) catch return VERDICT_ILLFORMED;
 
-    if (!h.initialized) {
-        setError("Handle not initialized");
-        return .@"error";
+    if (child.stdin) |stdin| {
+        stdin.writeStreamingAll(io, term) catch {};
+        stdin.writeStreamingAll(io, "\n") catch {};
+        stdin.close(io);
+        child.stdin = null;
     }
-
-    // Example processing logic
-    _ = input;
-
-    clearError();
-    return .ok;
-}
-
-//==============================================================================
-// String Operations
-//==============================================================================
-
-/// Get a string result (example)
-/// Caller must free the returned string
-export fn {{project}}_get_string(handle: ?*Handle) ?[*:0]const u8 {
-    const h = handle orelse {
-        setError("Null handle");
-        return null;
+    const result = child.wait(io) catch return VERDICT_ILLFORMED;
+    return switch (result) {
+        .exited => |code| switch (code) {
+            VERDICT_ACCEPTED, VERDICT_REJECTED, VERDICT_ILLFORMED => code,
+            else => VERDICT_ILLFORMED,
+        },
+        else => VERDICT_ILLFORMED,
     };
-
-    if (!h.initialized) {
-        setError("Handle not initialized");
-        return null;
-    }
-
-    // Example: allocate and return a string
-    const result = h.allocator.dupeZ(u8, "Example result") catch {
-        setError("Failed to allocate string");
-        return null;
-    };
-
-    clearError();
-    return result.ptr;
 }
 
-/// Free a string allocated by the library
-export fn {{project}}_free_string(str: ?[*:0]const u8) void {
-    const s = str orelse return;
-    const allocator = std.heap.c_allocator;
-
-    const slice = std.mem.span(s);
-    allocator.free(slice);
+/// C entry point. The kernel binary is found via $ANYTYPE_CHECK_BIN,
+/// falling back to `anytype-check` on PATH. A missing binary reports
+/// VERDICT_ILLFORMED — the seam never invents an acceptance.
+export fn anytype_check(discipline: u8, term: [*:0]const u8) u8 {
+    var threaded: std.Io.Threaded = .init(std.heap.page_allocator, .{});
+    defer threaded.deinit();
+    const bin: []const u8 = if (std.c.getenv("ANYTYPE_CHECK_BIN")) |v|
+        std.mem.span(@as([*:0]const u8, v))
+    else
+        "anytype-check";
+    return checkWith(threaded.io(), bin, discipline, std.mem.span(term));
 }
 
-//==============================================================================
-// Array/Buffer Operations
-//==============================================================================
+// ---------------------------------------------------------------------------
+// Tests (zig build test). The round-trip tests need the kernel binary at
+// ../../../build/exec/anytype-check (built by `just test`); they fail if
+// it is absent, because a seam test that cannot run must not pass.
+// ---------------------------------------------------------------------------
 
-/// Process an array of data
-export fn {{project}}_process_array(
-    handle: ?*Handle,
-    buffer: ?[*]const u8,
-    len: u32,
-) Result {
-    const h = handle orelse {
-        setError("Null handle");
-        return .null_pointer;
-    };
+const KERNEL_BIN = "../../../build/exec/anytype-check";
 
-    const buf = buffer orelse {
-        setError("Null buffer");
-        return .null_pointer;
-    };
-
-    if (!h.initialized) {
-        setError("Handle not initialized");
-        return .@"error";
-    }
-
-    // Access the buffer
-    const data = buf[0..len];
-    _ = data;
-
-    // Process data here
-
-    clearError();
-    return .ok;
+test "unknown discipline is ill-formed without spawning" {
+    try std.testing.expectEqual(
+        VERDICT_ILLFORMED,
+        checkWith(std.testing.io, KERNEL_BIN, 9, "tt"),
+    );
 }
 
-//==============================================================================
-// Error Handling
-//==============================================================================
-
-/// Get the last error message
-/// Returns null if no error
-export fn {{project}}_last_error() ?[*:0]const u8 {
-    const err = last_error orelse return null;
-
-    // Return C string (static storage, no need to free)
-    const allocator = std.heap.c_allocator;
-    const c_str = allocator.dupeZ(u8, err) catch return null;
-    return c_str.ptr;
+test "round trip: affine accepts drop" {
+    try std.testing.expectEqual(
+        VERDICT_ACCEPTED,
+        checkWith(std.testing.io, KERNEL_BIN, 0, "(lam 1 bool tt)"),
+    );
 }
 
-//==============================================================================
-// Version Information
-//==============================================================================
-
-/// Get the library version
-export fn {{project}}_version() [*:0]const u8 {
-    return VERSION.ptr;
+test "round trip: exact rejects drop (the discipline split)" {
+    try std.testing.expectEqual(
+        VERDICT_REJECTED,
+        checkWith(std.testing.io, KERNEL_BIN, 1, "(lam 1 bool tt)"),
+    );
 }
 
-/// Get build information
-export fn {{project}}_build_info() [*:0]const u8 {
-    return BUILD_INFO.ptr;
-}
-
-//==============================================================================
-// Callback Support
-//==============================================================================
-
-/// Callback function type (C ABI)
-pub const Callback = *const fn (u64, u32) callconv(.C) u32;
-
-/// Register a callback
-export fn {{project}}_register_callback(
-    handle: ?*Handle,
-    callback: ?Callback,
-) Result {
-    const h = handle orelse {
-        setError("Null handle");
-        return .null_pointer;
-    };
-
-    const cb = callback orelse {
-        setError("Null callback");
-        return .null_pointer;
-    };
-
-    if (!h.initialized) {
-        setError("Handle not initialized");
-        return .@"error";
-    }
-
-    // Store callback for later use
-    _ = cb;
-
-    clearError();
-    return .ok;
-}
-
-//==============================================================================
-// Utility Functions
-//==============================================================================
-
-/// Check if handle is initialized
-export fn {{project}}_is_initialized(handle: ?*Handle) u32 {
-    const h = handle orelse return 0;
-    return if (h.initialized) 1 else 0;
-}
-
-//==============================================================================
-// Tests
-//==============================================================================
-
-test "lifecycle" {
-    const handle = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(handle);
-
-    try std.testing.expect({{project}}_is_initialized(handle) == 1);
-}
-
-test "error handling" {
-    const result = {{project}}_process(null, 0);
-    try std.testing.expectEqual(Result.null_pointer, result);
-
-    const err = {{project}}_last_error();
-    try std.testing.expect(err != null);
-}
-
-test "version" {
-    const ver = {{project}}_version();
-    const ver_str = std.mem.span(ver);
-    try std.testing.expectEqualStrings(VERSION, ver_str);
+test "round trip: ill-formed input" {
+    try std.testing.expectEqual(
+        VERDICT_ILLFORMED,
+        checkWith(std.testing.io, KERNEL_BIN, 0, "garbage(("),
+    );
 }

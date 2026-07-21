@@ -2,8 +2,11 @@
 -- Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 ||| ABI Layout Verification
 |||
-||| This module provides formal proofs about memory layout, alignment,
-||| and padding for C-compatible structs.
+||| Formal proofs about memory layout, alignment, and padding for the
+||| C-compatible structs anytype actually passes across its seam. The
+||| generic machinery (Divides, StructLayout, FieldsAligned) is inherited
+||| from the RSR template; the layouts proven at the bottom are anytype's
+||| own request/response structs.
 
 module Abi.Layout
 
@@ -101,28 +104,60 @@ data CABICompliant : StructLayout -> Type where
            CABICompliant l
 
 --------------------------------------------------------------------------------
--- Example and Proofs
+-- anytype wire structs
 --------------------------------------------------------------------------------
 
-||| Example: struct { int32_t x; int64_t y; double z; }
-||| On 64-bit Linux, this should have size 24, alignment 8.
-public export
-exampleLayout : StructLayout
-exampleLayout =
-  MkStructLayout
-    [ MkField "x" 0 4 4     -- Bits32 at offset 0
-    , MkField "y" 8 8 8     -- Bits64 at offset 8 (4 bytes padding)
-    , MkField "z" 16 8 8    -- Double at offset 16
-    ]
-    24  -- Total size: 24 bytes
-    8   -- Alignment: 8 bytes
-    {aligned = div8_24}
+div1_0 : Divides 1 0
+div1_0 = MkDivides 0 Refl
 
-||| Proof that example layout is valid
+div4_4 : Divides 4 4
+div4_4 = MkDivides 1 Refl
+
+||| anytype_request_t on 64-bit targets:
+|||   struct { uint8_t discipline; /* pad 3 */ uint32_t term_len;
+|||            const uint8_t *term_utf8; }
+||| Size 16, alignment 8. The Zig side asserts the same layout with
+||| comptime @sizeOf/@offsetOf checks against these numbers.
 public export
-exampleLayoutValid : CABICompliant Abi.Layout.exampleLayout
-exampleLayoutValid = CABIOk Abi.Layout.exampleLayout (
-  ConsField (MkField "x" 0 4 4) _ div4_0 (
-  ConsField (MkField "y" 8 8 8) _ div8_8 (
-  ConsField (MkField "z" 16 8 8) _ div8_16 (
+requestLayout : StructLayout
+requestLayout =
+  MkStructLayout
+    [ MkField "discipline" 0 1 1
+    , MkField "term_len" 4 4 4
+    , MkField "term_utf8" 8 8 8
+    ]
+    16
+    8
+    {aligned = div8_16}
+
+public export
+requestLayoutValid : CABICompliant Abi.Layout.requestLayout
+requestLayoutValid = CABIOk Abi.Layout.requestLayout (
+  ConsField (MkField "discipline" 0 1 1) _ div1_0 (
+  ConsField (MkField "term_len" 4 4 4) _ div4_4 (
+  ConsField (MkField "term_utf8" 8 8 8) _ div8_8 (
+  NoFields))))
+
+||| anytype_response_t on 64-bit targets:
+|||   struct { uint8_t verdict; /* pad 3 */ uint32_t msg_len;
+|||            const uint8_t *msg_utf8; }
+||| Size 16, alignment 8.
+public export
+responseLayout : StructLayout
+responseLayout =
+  MkStructLayout
+    [ MkField "verdict" 0 1 1
+    , MkField "msg_len" 4 4 4
+    , MkField "msg_utf8" 8 8 8
+    ]
+    16
+    8
+    {aligned = div8_16}
+
+public export
+responseLayoutValid : CABICompliant Abi.Layout.responseLayout
+responseLayoutValid = CABIOk Abi.Layout.responseLayout (
+  ConsField (MkField "verdict" 0 1 1) _ div1_0 (
+  ConsField (MkField "msg_len" 4 4 4) _ div4_4 (
+  ConsField (MkField "msg_utf8" 8 8 8) _ div8_8 (
   NoFields))))

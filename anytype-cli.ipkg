@@ -1,0 +1,13 @@
+package anytype-cli
+version = 0.1.0
+authors = "hyperpolymath"
+license = "MPL-2.0"
+brief = "anytype-check: process-boundary entry point for the kernel"
+
+sourcedir = "src/cli"
+depends = base, anytype, anytype-abi
+
+modules = Anytype.Sexp
+        , Anytype.Main
+main = Anytype.Main
+executable = anytype-check

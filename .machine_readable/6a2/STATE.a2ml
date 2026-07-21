@@ -6,25 +6,25 @@
 [metadata]
 project = "anytype"
 version = "0.1.0"
-last-updated = "2026-06-28"
+last-updated = "2026-07-21"
 status = "active"  # active | paused | archived
 
 [project-context]
 name = "anytype"
 purpose = "Reference kernel for systemet (Equality Theory): a parameterised checker whose discipline is the chosen L2 grade algebra. Implementation side of the systemet/anytype split."
-completion-percentage = 10
+completion-percentage = 40
 
 [position]
-phase = "design"           # design | implementation | testing | maintenance | archived
+phase = "implementation"   # design | implementation | testing | maintenance | archived
 maturity = "experimental"  # experimental | alpha | beta | production | lts
 
 [route-to-mvp]
 milestones = [
   { name = "Phase 0: Split kernel out of the EveryType draft; instantiate RSR repo", completion = 100 },
   { name = "Phase 1: Design write-up (pluggable grades, L1 conversion, gates)", completion = 80 },
-  { name = "Phase 2: L2 grade-algebra interface + first concrete grade (affine)", completion = 0 },
-  { name = "Phase 3: L1 conversion checker + totality gate", completion = 0 },
-  { name = "Phase 4: anytype-specific typed ABI/FFI seam (replace template seam)", completion = 0 },
+  { name = "Phase 2: L2 grade-algebra interface + first concrete grade (affine)", completion = 100 },
+  { name = "Phase 3: L1 conversion checker + totality gate", completion = 100 },
+  { name = "Phase 4: anytype-specific typed ABI/FFI seam (replace template seam)", completion = 100 },
   { name = "Phase 5: L3 guarded recursion; L0 lowering target", completion = 0 },
   { name = "Phase 6: L4 effect handlers + TEA-erasure (gated on systemet OPEN-A)", completion = 0 },
 ]
@@ -34,10 +34,11 @@ milestones = [
 
 [critical-next-actions]
 actions = [
-  "Define the L2 grade-algebra interface against systemet's stated laws.",
-  "Implement the L1 conversion checker (normalize + compare) and the totality gate.",
-  "Replace the template ABI/FFI seam with an anytype-specific one.",
-  "Keep README/EXPLAINME inside what is built; no 'usable checker' claim until it exists.",
+  "Add branching to L1: needs a join (least upper bound) on grades beyond the semiring+order laws -- design the extension against systemet first.",
+  "L3 guarded recursion (Phase 5), then L0 lowering target.",
+  "In-process seam: link the kernel via the RefC backend instead of spawning anytype-check.",
+  "Decide the fate of the five quarantined RSR template proof modules (fix or delete; tracked in scripts/check-idris2-proofs.sh MANIFEST).",
+  "Keep README/EXPLAINME inside what is built; the MVP claim is 'distinct disciplines from one rule set', not 'usable general-purpose checker'.",
 ]
 
 [maintenance-status]

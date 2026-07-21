@@ -1,3 +1,28 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= ffi Logic
+= anytype FFI (Zig)
+
+`libanytype` exports `anytype_check(discipline: u8, term: [*:0]const u8) u8`,
+the C symbol declared in `src/interface/Abi/Foreign.idr`. Verdict return
+values are `Abi.Types.verdictCode`: 0 accepted, 1 rejected, 2 ill-formed.
+
+*MVP transport is a spawned process*: the export locates the `anytype-check`
+kernel binary (`$ANYTYPE_CHECK_BIN`, else PATH) and speaks the seam protocol
+(term on stdin, verdict as exit code). In-process linkage of the Idris2
+kernel (RefC backend) is future work. A missing binary reports ill-formed —
+the seam never invents an acceptance.
+
+Wire structs (`anytype_request_t`, `anytype_response_t`) are comptime-asserted
+against the layouts proven `CABICompliant` in `src/interface/Abi/Layout.idr`;
+edit a layout on either side and one of the two gates fails.
+
+Build and test (Zig 0.16, pinned in `.tool-versions`):
+
+[source,sh]
+----
+zig build          # static libanytype
+zig build test     # comptime layout asserts + kernel round-trip tests
+----
+
+The round-trip tests need `build/exec/anytype-check` at the repo root
+(`just test` builds it) and FAIL when it is absent, never skip.

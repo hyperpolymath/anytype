@@ -19,7 +19,7 @@
 -- The RSR validators accept either Abi/ (canonical, case-consistent) or a
 -- lowercase abi/ for downstream repos that ship lowercase — but never both.
 
-package abi
+package anytype-abi
 
 version = 0.1.0
 

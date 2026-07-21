@@ -35,14 +35,17 @@ file is a draft.
 
 == What we do NOT claim
 
-* *There is no working type checker yet.* `src/`, `tests/`, and `verification/proofs/`
-  are RSR *scaffolding* inherited from the template, not an anytype implementation.
-* *The pluggable-grade interface does not exist in code yet.* It is the first build
-  target, not a shipped feature.
-* *No layer is implemented.* The L0–L4 table in the README is intent + status, not a
-  record of working code.
+* *The kernel is an MVP cut, not a general-purpose type checker.* No dependent
+  types, no branching, no L3 recursion, no L0 lowering, no L4 effects.
+* *No soundness proof for the checker.* The grade-algebra laws are machine-checked
+  proof fields and the golden matrix is real, but progress/preservation for the
+  L1 checker is not proven.
+* *The totality gate is syntactic* (no recursion constructor in the type-index
+  language), not a termination analysis.
 * *TEA-erasure is OPEN* (in systemet) and not started here. Do not cite it.
-* *The ABI/FFI seam files are the template's*, not yet an anytype-specific ABI.
+* *The seam transport is a spawned process*, not in-process linkage; five
+  never-compiling template proof modules are quarantined in
+  `scripts/check-idris2-proofs.sh`, not fixed.
 
 == Provenance note
 

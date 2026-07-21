@@ -1,94 +1,72 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-// Template: rsr-template-repo/docs/status/PROOF-STATUS.adoc
-// Tracks proof completion. Requirements defined in PROOF-NEEDS.adoc
-= Proof Status — {{PROJECT}}
+= Proof Status — anytype
 
-== Summary
+The single source of truth for "does the Idris2 in this repo compile?" is
+`scripts/check-idris2-proofs.sh` (run as `just proof-check-idris2`, and in CI
+by `.github/workflows/idris2-proof.yml`). Its MANIFEST lists every `.idr`
+file as `gated` (must compile) or `quarantine` (known-broken, must keep
+failing); an unlisted module is an error. This page summarises; the script
+decides.
 
-[cols="2,1,1,1,1,1", options="header"]
+== What is actually proven (gated, `%default total`, no escape hatches)
+
+[cols="2,3,3", options="header"]
 |===
-| Category | Total | Done | In Progress | Blocked | Remaining
+| Area | Modules | What the proofs say
 
-| ABI/FFI (ABI) | 5 | 0 | 0 | 0 | 5
-| Typing (TP) | 2 | 0 | 0 | 0 | 2
-| Invariant (INV) | 0 | 0 | 0 | 0 | 0
-| Security (SEC) | 0 | 0 | 0 | 0 | 0
-| Concurrency (CONC) | 0 | 0 | 0 | 0 | 0
-| Algorithm (ALG) | 0 | 0 | 0 | 0 | 0
-| Domain (DOM) | 0 | 0 | 0 | 0 | 0
-| *Total* | *7* | *0* | *0* | *0* | *7*
-|===
+| L2 grade algebras
+| `src/kernel/Anytype/Grade/{Algebra,Affine,Exact}.idr`
+| `GradeAlgebra` carries its ordered-semiring laws as proof fields, so an
+unlawful algebra is unrepresentable. The affine `{0,1,ω}` instance (mirroring
+AffineScript `lib/quantity.ml`) and the exact-usage `ℕ` instance discharge
+every law — associativity, commutativity, identities, annihilation,
+distributivity, order reflexivity/transitivity/antisymmetry, and
+monotonicity of both operations.
 
-*Overall*: 0% proven
+| L1 totality
+| `src/kernel/Anytype/Core/{Syntax,Normalise,Conversion,Check}.idr`
+| The type-index language has no recursion constructor and `normalise` is
+machine-checked total, so conversion (normalise-and-compare) is decidable by
+construction. This is a syntactic totality gate, not a termination analysis.
 
-== Proofs Done
+| Seam encodings
+| `src/interface/Abi/Types.idr`
+| Discipline and verdict wire codes are injective; decoding inverts encoding.
 
-// Format:
-// | ID | Proof | Prover | File | Date | Verified By |
-// | ABI-1 | Non-null pointer proofs | Idris2 | verification/proofs/idris2/ABI/Pointers.idr | 2026-XX-XX | idris2 --check |
-
-[cols="1,3,1,3,1,2", options="header"]
-|===
-| ID | Proof | Prover | File | Date | Verified By
-
-| — | No proofs completed yet | — | — | — | —
-|===
-
-== Proofs In Progress
-
-[cols="1,3,1,2,1,2", options="header"]
-|===
-| ID | Proof | Prover | Assignee | Started | Blocker
-
-| — | — | — | — | — | —
+| Seam layouts
+| `src/interface/Abi/Layout.idr`
+| `anytype_request_t` / `anytype_response_t` (16 bytes, align 8) are proven
+`CABICompliant`; the Zig side comptime-asserts the same numbers, so a layout
+drift on either side breaks a gate.
 |===
 
-== Proofs Blocked
+== Quarantined (RSR template stock, never compiled)
 
-[cols="1,3,2,3", options="header"]
-|===
-| ID | Proof | Blocked By | Notes
+Five modules under `verification/proofs/idris2/` are template inheritance
+that predates the kernel and does not compile (missing `Data.Nat` imports;
+one erased-field projection). They are quarantined in the MANIFEST with
+per-module reasons: the gate requires them to KEEP failing, and flags them
+for promotion if one starts passing. `ABI/Foreign.idr` is the one template
+module that compiles and is gated. Their fate (fix or delete) is tracked in
+`STATE.a2ml` critical-next-actions.
 
-| — | — | — | —
-|===
+== Not proven (open obligations)
 
-== Proofs Remaining
+* Type safety (progress/preservation) of the L1 checker — the checker is
+  executable and golden-tested, not yet accompanied by a soundness proof.
+* systemet's theory obligations (L1 soundness/completeness of
+  conversion-as-equality, trope preservation, TEA erasure) live upstream in
+  systemet and are all open there.
+* The Agda/Coq/Lean4/TLA+ stubs under `verification/proofs/` are untouched
+  template files with no gate; they claim nothing.
 
-[cols="1,3,1,1,1,1", options="header"]
-|===
-| ID | Proof | Category | Prover | Priority | Est. Effort
+== Verification commands
 
-| ABI-1 | Non-null pointer proofs | ABI | Idris2 | P1 | 2h
-| ABI-2 | Memory layout correctness | ABI | Idris2 | P1 | 4h
-| ABI-3 | Platform type size proofs | ABI | Idris2 | P1 | 2h
-| ABI-4 | FFI function return type proofs | ABI | Idris2 | P1 | 2h
-| ABI-5 | C ABI compliance | ABI | Idris2 | P1 | 4h
-| TP-1 | Core data type well-formedness | TP | Idris2 | P1 | 4h
-| TP-2 | Public API type safety | TP | Lean4 | P2 | 4h
-|===
-
-== Verification Commands
-
-[source,bash]
+[source,sh]
 ----
-# Check all Idris2 proofs
-just proof-check-idris2
-
-# Check all Lean4 proofs
-just proof-check-lean4
-
-# Check all Agda proofs
-just proof-check-agda
-
-# Check all Coq proofs
-just proof-check-coq
-
-# Run all proof checks
-just proof-check-all
-
-# Scan for dangerous patterns
-panic-attack assail --proofs-only
+just proof-check-idris2   # every .idr, manifest-gated, hard-fails without idris2
+just test                 # kernel build + 19-case golden matrix + seam tests
 ----
 
 == Changelog
@@ -98,4 +76,5 @@ panic-attack assail --proofs-only
 | Date | Change | By
 
 | 2026-04-04 | Initial proof status tracking | Template
+| 2026-07-21 | Re-scoped from template to the real kernel: gated/quarantine MANIFEST, law-field proofs, layout proofs | MVP kernel work
 |===

@@ -1,0 +1,20 @@
+-- anytype kernel package.
+-- Module namespace matches the physical path under src/kernel exactly
+-- (case-sensitive on every filesystem) — see abi.ipkg for the lesson.
+package anytype
+version = 0.1.0
+authors = "hyperpolymath"
+license = "MPL-2.0"
+brief = "Parameterised graded type checker: pick the algebra, get the discipline"
+
+sourcedir = "src/kernel"
+depends = base
+
+modules = Anytype.Grade.Algebra
+        , Anytype.Grade.Affine
+        , Anytype.Grade.Exact
+        , Anytype.Core.Syntax
+        , Anytype.Core.Normalise
+        , Anytype.Core.Conversion
+        , Anytype.Core.Check
+        , Anytype.Kernel

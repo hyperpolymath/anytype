@@ -129,26 +129,29 @@ clean-all: clean
 # TEST & QUALITY
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Run all tests
+# Hard-fails if idris2 is absent -- a gate that cannot fail is not a gate
+# (see scripts/check-idris2-proofs.sh for the history).
+# Typecheck the ABI seam, build the kernel, run the golden matrix
 test *args:
-    @echo "Running tests..."
-    # TODO: Replace with your test command
-    # Examples:
-    #   cargo test {{args}}
-    #   mix test {{args}}
-    #   zig build test {{args}}
-    #   deno test {{args}}
-    @echo "Tests passed!"
+    @command -v idris2 >/dev/null || { echo "FAIL: idris2 not on PATH (install Idris2 0.7.0)"; exit 1; }
+    idris2 --install anytype.ipkg
+    idris2 --install abi.ipkg
+    idris2 --build anytype-tests.ipkg
+    ./build/exec/anytype-tests
+    idris2 --build anytype-cli.ipkg
+    ./scripts/check-cli.sh
+    @command -v zig >/dev/null || { echo "FAIL: zig not on PATH (Zig seam tests need it)"; exit 1; }
+    cd src/interface/ffi && zig build test
 
 # Run tests with verbose output
 test-verbose:
     @echo "Running tests (verbose)..."
     # TODO: Replace with verbose test command
 
-# Smoke test
+# Smoke test: does the kernel package typecheck at all?
 test-smoke:
-    @echo "Smoke test..."
-    # TODO: Add basic sanity checks
+    @command -v idris2 >/dev/null || { echo "FAIL: idris2 not on PATH"; exit 1; }
+    idris2 --typecheck anytype.ipkg
 
 # Run end-to-end tests (full pipeline: build → run → verify)
 e2e:
@@ -593,7 +596,14 @@ help-me:
 # FORMAL VERIFICATION (PROOFS) — see build/just/proofs.just
 # ═══════════════════════════════════════════════════════════════════════════════
 
-import? "build/just/proofs.just"
+# Proof gates replace the deleted build/just/proofs.just, whose recipes
+# exited 0 when the prover was absent (the estate fake-gate flaw).
+# Type-check every Idris2 module against the MANIFEST (hard-fail gate)
+proof-check-idris2:
+    ./scripts/check-idris2-proofs.sh
+
+# Run all proof gates
+proof-check: proof-check-idris2
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SESSION MANAGEMENT (THIN BINDINGS TO CENTRAL STANDARDS)
