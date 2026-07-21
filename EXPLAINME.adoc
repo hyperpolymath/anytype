@@ -23,18 +23,28 @@ its current state*.
 
 Claim: anytype is the reference kernel for Equality Theory.
 
-Reality at this commit:
+Reality at this commit (2026-07-21, MVP kernel):
 
-* There is *no working checker yet*. `src/` contains RSR scaffolding
-  (`src/interface/Abi/*.idr`, `src/interface/ffi/*.zig`, READMEs, AI-manifests), not
-  an anytype implementation.
-* `tests/` and `verification/proofs/` are template stubs, not anytype tests/proofs.
-* What is real today: the repository *shape* (RSR), the *design* of the kernel in
-  this file and the README, and the *split* that makes systemet the theory and
-  anytype the engine.
+* The kernel *exists for the MVP cut*: `src/kernel/` is a usage-counting
+  bidirectional checker for a simply-graded λ-calculus, parameterised by a
+  `GradeAlgebra` record whose ordered-semiring laws are proof fields. Two
+  instances ship — affine `{0,1,ω}` (mirroring AffineScript `lib/quantity.ml`)
+  and exact-usage `ℕ` — and the 19-case golden matrix shows the same rules
+  yielding distinct disciplines (affine accepts drop, exact rejects it).
+* The seam is anytype's own: `src/interface/Abi/` (wire types with injective
+  codes; layouts proven `CABICompliant`), the `anytype-check` CLI
+  (`src/cli/`), and the Zig `anytype_check` export (`src/interface/ffi/`)
+  with comptime asserts against the proven layouts. MVP transport is a
+  spawned process; in-process RefC linkage is future work.
+* Gates are real and hard-fail: `just test`, `just proof-check-idris2`
+  (manifest over every `.idr`; missing prover = FAIL), and CI
+  `idris2-proof.yml`. Five never-compiling template modules under
+  `verification/proofs/idris2/` are quarantined, not hidden.
+* Not built: dependent types, branching (needs a grade join beyond the
+  stated laws), L3 recursion, L0 lowering, L4 effects (TEA is open in
+  systemet), and any soundness proof for the checker itself.
 
-Everything below describes the *intended* mapping. Where a file does not yet exist or
-is a stub, it is named as such. The dated, signed snapshot is `AFFIRMATION.adoc`.
+The dated snapshot is `AFFIRMATION.adoc`.
 
 == Pluggable grades (the L2 mechanism)
 
@@ -52,9 +62,14 @@ Division of responsibility:
 * systemet *defines the laws* a grade algebra must satisfy.
 * anytype *implements the interface and checks candidates against those laws*.
 
-Caveat:
+State:
 
-* None of this interface exists in code yet. It is the kernel's first build target.
+* Built (MVP): `src/kernel/Anytype/Grade/Algebra.idr` is the interface — a record
+  whose law fields make an unlawful algebra unrepresentable. `Affine.idr` and
+  `Exact.idr` are the first two instances. The richer grades (cost,
+  information-flow lattice, probability-like, privacy budget) remain future
+  instances; branching additionally needs a join operation the record does not
+  yet carry.
 
 == L1 equality and the totality gate
 
@@ -67,10 +82,16 @@ Intended implementation:
 * A totality checker that rejects non-terminating type-level functions, so conversion
   terminates.
 
-Caveat:
+State and caveat:
 
+* Built (MVP): `Anytype.Core.Normalise` + `Anytype.Core.Conversion`, invoked at the
+  single check/infer mode switch in `Anytype.Core.Check`. The MVP totality gate is
+  *syntactic*: the type-index language (`TNat`) has no recursion constructor, and the
+  normaliser is `%default total` — machine-checked, but a gate by construction, not a
+  termination analysis over a type-level function space (there is no type-level
+  function space yet).
 * The strength of "equality is conversion" is exactly the strength of the totality
-  checker. Any escape hatch must be recorded as an explicit unsafe boundary in
+  gate. Any escape hatch must be recorded as an explicit unsafe boundary in
   `AFFIRMATION.adoc`, never folded silently into equality. The *theorem* that this is
   sound is systemet's obligation; this repo only has to *implement the check*.
 
@@ -123,10 +144,14 @@ How this is implemented:
 * `src/interface/Abi/` holds Idris2 interface/layout descriptions; `src/interface/ffi/`
   holds the Zig FFI; `src/interface/generated/` is where generated C headers land.
 
-Caveat:
+State:
 
-* These are currently the *template's* seam files, not anytype-specific ones. They
-  demonstrate the pattern; they do not yet describe an anytype ABI.
+* Built (MVP): `Abi.Types` (discipline/verdict codes, injectivity + round-trip
+  proofs), `Abi.Layout` (`anytype_request_t`/`anytype_response_t` proven
+  `CABICompliant`), `Abi.Foreign` (the `anytype_check` contract), and the Zig side
+  comptime-asserting the same layouts. Transport is a spawned `anytype-check`
+  process; `src/interface/generated/` C headers and in-process linkage are future
+  work.
 
 == RSR integration
 

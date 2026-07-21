@@ -91,11 +91,17 @@ only the implementation status.
 
 | *L2 · resources `□`*
 | The graded-modal substrate + the pluggable grade-algebra interface
-| *design* — this is the kernel's centre of gravity
+| *built (MVP)* — `Anytype.Grade.Algebra` is an ordered-semiring record whose laws
+are proof fields; instances exist for affine `{0,1,ω}` (AffineScript's discipline)
+and exact-usage `ℕ`. Same rules, distinct disciplines — demonstrated in the golden
+matrix.
 
 | *L1 · equality*
 | Equality as `normalize` + `compare`; the totality check that makes it decidable
-| *design*
+| *built (MVP cut)* — a bidirectional simply-graded λ-calculus whose type-index
+language has no recursion constructor, so type-level computation is total *by
+construction* (a syntactic gate, machine-checked via `%default total`, not a
+termination analysis). Conversion is normalise-and-compare at one site.
 
 | *L0 · runtime*
 | Lowering to a WASM/C target
@@ -104,11 +110,19 @@ only the implementation status.
 
 [WARNING]
 ====
-*Honesty check.* At this commit there is *no working kernel*. The `src/`, `tests/`,
-and `verification/proofs/` trees are RSR *scaffolding* inherited from the template,
-not a checker. This README states intent (where anytype is going); the engineering
-state lives in `EXPLAINME.adoc` and the dated snapshot in `AFFIRMATION.adoc`. Do not
-cite anytype as a usable type checker yet.
+*Honesty check.* At this commit the kernel exists *for the MVP cut only*:
+a simply-graded λ-calculus (`src/kernel/`) with pluggable grade algebras, a
+process-boundary seam (`anytype-check` + the Zig `anytype_check` export), and
+real gates (`just test`, `just proof-check-idris2`, CI `idris2-proof.yml`).
+What it is *not* yet: no dependent types, no branching (`if` needs a grade
+join beyond the stated semiring+order laws), no L3 guarded recursion, no L0
+lowering, no L4 effects (gated on systemet's open TEA-erasure result), and
+the seam transport is a spawned process, not in-process linkage. Five RSR
+template modules under `verification/proofs/idris2/` never compiled and are
+quarantined in `scripts/check-idris2-proofs.sh` rather than deleted. Do not
+cite anytype as a general-purpose type checker; cite it as a working
+demonstration that one set of rules yields distinct disciplines by choosing
+the algebra.
 ====
 
 == Quick start
