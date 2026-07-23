@@ -1,0 +1,12 @@
+package anytype-tests
+version = 0.1.0
+authors = "hyperpolymath"
+license = "MPL-2.0"
+brief = "Golden matrix for the anytype kernel"
+
+sourcedir = "verification/tests/kernel"
+depends = base, anytype
+
+modules = Tests.Main
+main = Tests.Main
+executable = anytype-tests

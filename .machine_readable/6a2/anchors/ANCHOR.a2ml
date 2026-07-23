@@ -29,6 +29,9 @@ domain = "programming-language implementation / type checkers"
 semantic-authority = "hyperpolymath/systemet"
 relationship = "implements"
 pin-required = true
+# Discharged 2026-07-21: the systemet commit this kernel implements.
+pinned-commit = "ba5930dc478c80b1f968eea4ca28acd0f9d67966"
+pinned-date = "2026-07-18"
 extend-not-redefine = true
 
 [semantic-authority]

@@ -1,23 +1,33 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= YOUR Template Repo Roadmap
+= anytype Roadmap
 
-== Current Status
+Mirrors `[route-to-mvp]` in `.machine_readable/6a2/STATE.a2ml` (which is the
+machine-readable source of truth).
 
-Initial development phase.
+== Done
 
-== Milestones
+* [x] Phase 0 — split the kernel out of the EveryType draft; RSR repo
+* [x] Phase 2 — L2 grade-algebra interface (laws as proof fields) + affine
+  `{0,1,ω}` and exact-usage `ℕ` instances
+* [x] Phase 3 — L1 conversion checker (normalise-and-compare) + syntactic
+  totality gate, with the 19-case golden matrix
+* [x] Phase 4 — anytype-specific seam: `Abi.{Types,Layout,Foreign}` rewritten
+  from the template, `anytype-check` CLI, Zig `anytype_check` export with
+  comptime layout asserts (MVP transport: spawned process)
 
-=== v0.1.0 - Foundation
-* [ ] Core functionality
-* [ ] Basic documentation
-* [ ] CI/CD pipeline
+== Next
 
-=== v1.0.0 - Stable Release
-* [ ] Full feature set
-* [ ] Comprehensive tests
-* [ ] Production ready
+* [ ] Phase 1 residue — finish the design write-up (currently 80%)
+* [ ] Branching in L1 — needs a grade join beyond the stated semiring+order
+  laws; design against systemet first, then extend `GradeAlgebra`
+* [ ] Phase 5 — L3 guarded recursion; L0 lowering target
+* [ ] In-process seam — link the kernel via the RefC backend instead of
+  spawning `anytype-check`
+* [ ] Quarantined template proofs — fix or delete the five never-compiling
+  modules under `verification/proofs/idris2/` (see the MANIFEST)
 
-== Future Directions
+== Blocked
 
-_To be determined based on community feedback._
+* Phase 6 — L4 effect handlers + TEA erasure: gated on systemet's open
+  TEA-erasure result (the headline open problem upstream).
