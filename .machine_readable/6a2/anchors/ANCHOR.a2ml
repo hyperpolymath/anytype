@@ -5,7 +5,7 @@
 
 [metadata]
 version = "1.0.0"
-last-updated = "2026-06-28"
+last-updated = "2026-07-28"
 
 [anchor]
 schema = "hyperpolymath.anchor/1"
@@ -29,9 +29,13 @@ domain = "programming-language implementation / type checkers"
 semantic-authority = "hyperpolymath/systemet"
 relationship = "implements"
 pin-required = true
-# Discharged 2026-07-21: the systemet commit this kernel implements.
-pinned-commit = "ba5930dc478c80b1f968eea4ca28acd0f9d67966"
-pinned-date = "2026-07-18"
+# Re-pinned 2026-07-28 to the systemet mainline: contains the citable ET-1..ET-15
+# ledger, the mechanized L1/L2 core with ET-2 (conversion decidability) PROVEN
+# (axiom audit clean), and accepted ADR-0002 (ET-16, parametric L0 observation).
+# The previous pin ba5930dc was a superseded side lineage whose content was
+# rescued into mainline via systemet PR #17/#24/#27.
+pinned-commit = "0af1a2f6a2b3a792517132cdfc3d48c82083051f"
+pinned-date = "2026-07-28"
 extend-not-redefine = true
 
 [semantic-authority]
