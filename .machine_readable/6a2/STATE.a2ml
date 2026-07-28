@@ -33,7 +33,6 @@ milestones = [
 # L4/TEA work is gated on systemet's open TEA-erasure result (not a code blocker yet).
 # ET-obligation audit vs systemet's citable ledger (docs/theory/OBLIGATIONS.adoc), 2026-07-21:
 issues = [
-  { id = 13, title = "[ET-L2] refresh systemet pin past the ET ledger (pin = ba5930dc, pre-ledger)" },
   { id = 14, title = "[ET-L2] ET-2/ET-3: conversion is a decision procedure, not a proven decision" },
   { id = 15, title = "[ET-L2] ET-5: only 2 of the named grade disciplines have instances" },
   { id = 16, title = "[ET-L2] ET-6/ET-7: Structural Gate absent" },
