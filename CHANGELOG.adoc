@@ -1,0 +1,38 @@
+== Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on https://keepachangelog.com/en/1.1.0/[Keep a
+Changelog], and this project adheres to
+https://semver.org/spec/v2.0.0.html[Semantic Versioning].
+
+=== [Unreleased]
+
+==== Changed
+
+* *Renamed EveryType → anytype.* The old name over-claimed a universal
+"`every type`" relation (exactly the System-Fc trap this design
+refuses). The honest claim is the opposite: pick _any_ L2 resource
+algebra, get _that_ discipline.
+* Re-scoped this repository to the *kernel/engine* only. The theory it
+implements was split out into the *systemet* repo (Equality Theory),
+which is now the semantic authority; anytype pins it upstream and
+extends-not-redefines it.
+* Rewrote `+README.adoc+` and `+EXPLAINME.adoc+` for the kernel, with an
+explicit honesty notice that no working checker exists yet (the
+`+src/+`/`+tests/+`/`+verification/+` trees are RSR scaffolding).
+
+==== Added
+
+* Instantiated identity descriptiles (CLADE/ECOSYSTEM/ANCHOR/STATE/META)
+and the AFFIRMATION honesty snapshot with the anytype identity and an
+honest early-stage status; ANCHOR pins systemet upstream.
+
+==== Notes
+
+* `+uuid+` is a PROVISIONAL deterministic UUIDv5 of the forge URL;
+`+clade+` is PROVISIONAL. Both must be confirmed/registered in
+`+gv-clade-index+`.
+* `+CLAUDE.md+` is generated from the descriptiles — run
+`+just claude-md+` to refresh it where `+nickel+`/`+just+` are
+available.

@@ -71,7 +71,7 @@ affinescript/              # AffineScript source subtree consumed by this templa
 tools/                     # TODO: consolidate with scripts/ or document the split (pending decision)
 .hypatia-ignore
 CLAUDE.md
-flake.nix
+flake.guix
 
 # ─── Declared 2026-08-06: entries the RSR template's directory map did
 #     not anticipate. The template targets a documentation repository;
