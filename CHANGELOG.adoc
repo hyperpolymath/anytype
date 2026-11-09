@@ -24,6 +24,10 @@ explicit honesty notice that no working checker exists yet (the
 
 ==== Added
 
+* `+README.adoc+` §"Relationship to ephapax (design reference only)":
+ephapax uses anytype as a design reference only. There is no code or
+build dependency (per the kernel ruling D-2026-10-12), and no soundness
+proof exists for the relationship.
 * Instantiated identity descriptiles (CLADE/ECOSYSTEM/ANCHOR/STATE/META)
 and the AFFIRMATION honesty snapshot with the anytype identity and an
 honest early-stage status; ANCHOR pins systemet upstream.
