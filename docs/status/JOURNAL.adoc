@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= anytype — thin session journal
+:updated: 2026-11-10
+
+What the next agent or human needs to resume work, and nothing that can be
+derived. This is the STATE v2 thin journal
+(`1-formats/templates/STATE.a2ml.v2.spec.adoc` in `standards`: phase, blockers,
+last action, next action), written as AsciiDoc because A2ML is retired.
+
+Where this file and the journal sections of `.machine_readable/6a2/STATE.a2ml`
+disagree, **this file governs** (`state-v1-decision`, option B, ruled
+2026-11-10). `STATE.a2ml` stays only until the checks and scripts that still
+require it are rewired.
+
+Kept elsewhere, on purpose: milestones in `ROADMAP.adoc`, history in the git
+log, evidence in `PROOF-STATUS.adoc`, task lists in the GitHub issues.
+
+phase::
+implementation. Built: the L2 grade-algebra interface with the affine and
+exact-usage instances, the L1 conversion checker with a syntactic totality gate
+(19-case golden matrix), and the typed ABI/FFI seam (`anytype-check`). Not
+started: L3 guarded recursion, the L0 lowering target, L4 effects. There is no
+working general-purpose checker yet (`AFFIRMATION.adoc`).
+
+last_action::
+Repaired the Idris2 proof workflow, which had failed on `main` since #55 moved
+`abi.ipkg`, and recorded ephapax as a design reference only (#73, 2026-11-10).
+
+next_action::
+Add branching to L1. It needs a join (least upper bound) on grades beyond the
+semiring-and-order laws, so design the extension against systemet first.
+
+session_marker::
+next_action carried from STATE v1 (2026-07-21); owner to confirm it is still
+the intended next step.
+
+updated::
+2026-11-10
+
+== Blockers
+
+[cols="2,5,3,2",options="header"]
+|===
+| id | description | waiting_on | since
+
+| `tea-gate`
+| Phase 6 (L4 effect handlers and TEA erasure) is gated on systemet's open
+  TEA-erasure result (ET-14). Not a code blocker yet.
+| systemet ET-14, OPEN
+| 2026-07-21 (first recorded in STATE v1)
+
+| `state-archive-rewire`
+| `STATE.a2ml` cannot be archived yet. `openssf-compliance.yml`, the Must
+  invariant, `scripts/validate-template.sh`, the e2e template test and the
+  arrival-pack generator still require it.
+| rewiring those consumers (several are derived from the estate canon)
+| 2026-11-10
+|===
+
+== Provenance
+
+* `phase` comes from `ROADMAP.adoc` (Done list). The kernel has had no logic
+  change since 2026-07-21: one commit touched `src/kernel/` in that time, a CI
+  remediation (#23).
+* `last_action` comes from the merge commit of #73.
+* `next_action` and the `tea-gate` blocker are carried from STATE v1 and are
+  not re-verified.
