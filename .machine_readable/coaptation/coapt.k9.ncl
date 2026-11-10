@@ -43,7 +43,8 @@
     ],
     descriptiles = [
       ".machine_readable/6a2/CLADE.a2ml",
-      ".machine_readable/6a2/STATE.a2ml",
+      "anytype_chora.deed",   # lifecycle + maturity
+      "docs/status/JOURNAL.adoc",   # phase
       ".machine_readable/6a2/ECOSYSTEM.a2ml",
       ".machine_readable/6a2/AGENTIC.a2ml",
       ".machine_readable/6a2/anchors/ANCHOR.a2ml",

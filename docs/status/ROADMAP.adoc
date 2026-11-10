@@ -2,8 +2,10 @@
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = anytype Roadmap
 
-Mirrors `[route-to-mvp]` in `.machine_readable/6a2/STATE.a2ml` (which is the
-machine-readable source of truth).
+This file is the home of the milestones (`state-v1-decision`, option B). The
+`[route-to-mvp]` rows of the archived STATE v1 are kept verbatim, with their
+percentages, in `.machine_readable/archive/state-v1.a2ml`. The current phase,
+blockers and next action are in `JOURNAL.adoc`.
 
 == Done
 

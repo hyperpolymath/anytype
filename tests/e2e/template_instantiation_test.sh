@@ -234,7 +234,7 @@ done
 log_step "Verifying machine-readable metadata"
 
 METADATA_FILES=(
-    ".machine_readable/6a2/STATE.a2ml"
+    "docs/status/JOURNAL.adoc"
     ".machine_readable/6a2/META.a2ml"
 )
 
