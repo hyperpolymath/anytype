@@ -39,7 +39,7 @@
   "must.anchors-directory" = {
     kind = "descriptile",
     witnesses = [ { fact = "anchor.authority", op = 'present } ],
-    note = "ANCHOR.a2ml was read from .machine_readable/6a2/anchors/",
+    note = "ANCHOR.a2ml was read from .machine_readable/descriptiles/anchors/",
   },
 
   # --- TRUST: deliberately NO descriptile witness. ---

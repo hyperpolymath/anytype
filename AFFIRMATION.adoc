@@ -30,7 +30,7 @@ file is a draft.
 | Claim | Status | Evidence
 | The repository is RSR-shaped and validates | affirmed-pending-run | `just validate` at the anchor SHA
 | The kernel's design is written down (pluggable L2 grades; L1 conversion; gates) | affirmed | `README.adoc`, `EXPLAINME.adoc`
-| anytype is the implementation; `systemet` is the theory it pins upstream | affirmed | `.machine_readable/6a2/anchors/ANCHOR.a2ml`, `ECOSYSTEM.a2ml`
+| anytype is the implementation; `systemet` is the theory it pins upstream | affirmed | `.machine_readable/descriptiles/anchors/ANCHOR.a2ml`, `ECOSYSTEM.a2ml`
 |===
 
 == What we do NOT claim

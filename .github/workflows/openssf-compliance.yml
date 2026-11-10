@@ -90,8 +90,8 @@ jobs:
           # Collect all required files that exist
           for f in SECURITY.md SECURITY.adoc .github/SECURITY.md LICENSE LICENSE.txt \
                    CONTRIBUTING.md CONTRIBUTING.adoc README.md README.adoc \
-                   docs/status/JOURNAL.adoc .machine_readable/6a2/META.a2ml \
-                   .machine_readable/6a2/ECOSYSTEM.a2ml CHANGELOG.md CHANGELOG.adoc; do
+                   docs/status/JOURNAL.adoc .machine_readable/descriptiles/META.a2ml \
+                   .machine_readable/descriptiles/ECOSYSTEM.a2ml CHANGELOG.md CHANGELOG.adoc; do
             [ -f "$f" ] && REQUIRED_FILES="$REQUIRED_FILES $f"
           done
 

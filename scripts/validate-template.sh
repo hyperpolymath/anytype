@@ -140,9 +140,9 @@ log_info "Phase 2: Machine-readable metadata (.machine_readable/)"
 echo ""
 
 check_file_exists "docs/status/JOURNAL.adoc" "Project journal"
-check_file_exists ".machine_readable/6a2/META.a2ml" "Architecture decisions"
-check_file_exists ".machine_readable/6a2/ECOSYSTEM.a2ml" "Ecosystem position"
-check_file_exists ".machine_readable/6a2/anchors/ANCHOR.a2ml" "Semantic boundary anchor"
+check_file_exists ".machine_readable/descriptiles/META.a2ml" "Architecture decisions"
+check_file_exists ".machine_readable/descriptiles/ECOSYSTEM.a2ml" "Ecosystem position"
+check_file_exists ".machine_readable/descriptiles/anchors/ANCHOR.a2ml" "Semantic boundary anchor"
 check_file_exists ".machine_readable/policies/MAINTENANCE-AXES.a2ml" "Maintenance axes"
 
 #==============================================================================
