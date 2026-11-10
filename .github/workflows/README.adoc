@@ -18,10 +18,10 @@ either loses real function — keep both.
 
 == Secret scanning is single-sourced
 
-`secret-scanner.yml` calls the standards reusable (gitleaks + a Rust-secrets
-check). An inline TruffleHog job was removed: the reusable deliberately retired
-TruffleHog as redundant with gitleaks, so re-adding it was duplicated work, not
-extra coverage.
+`secret-scanner.yml` calls the reusable scanner of
+`hyperpolymath/proven-cicd-and-workflows` at a pinned commit (gitleaks, a
+Rust-secrets check and a shell-secrets check). An inline TruffleHog job was
+removed earlier as redundant with gitleaks; do not add it again.
 
 == SAST tools are complementary, not redundant
 
