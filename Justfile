@@ -135,7 +135,7 @@ clean-all: clean
 test *args:
     @command -v idris2 >/dev/null || { echo "FAIL: idris2 not on PATH (install Idris2 0.7.0)"; exit 1; }
     idris2 --install anytype.ipkg
-    idris2 --install abi.ipkg
+    idris2 --install src/interface/abi.ipkg
     idris2 --build anytype-tests.ipkg
     ./build/exec/anytype-tests
     idris2 --build anytype-cli.ipkg
