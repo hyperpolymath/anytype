@@ -1,0 +1,134 @@
+;; SPDX-License-Identifier: MPL-2.0
+;; SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+;;
+;; DRAFT (Slice-2 prep) — not yet wired; the .machine_readable/6a2/ a2ml files
+;; stay live and authoritative until the estate wave + kyX (D313) land. Clauses
+;; are translated field-for-field from those descriptiles under the RULED mapping
+;; specs in standards 1-formats/deed/mappings/ (the only authority a family
+;; translation may cite):
+;;   CLADE.a2ml -> (identity)(clade)(forges)(lineage)(status)
+;;                 per clade-to-repo-deed.adoc  [RULED 2026-10-27]
+;;   AGENTIC/NEUROSYM/PLAYBOOK.a2ml -> (agentic)(neurosym)(playbook)
+;;                 per agentic-neurosym-playbook-to-repo-deed.adoc  [RULED 2026-10-27]
+;;   STATE.a2ml (v1) -> (maturity), and (status) deduped
+;;                 per state-v1-decision.adoc, OPTION B  [RULED 2026-11-10, owner]
+;;                 Carried: [position] maturity -> (maturity :level ...);
+;;                 [metadata] status "active" dedupes into (status :phase active).
+;;                 NOT carried (journal / derivable; they go to the archive
+;;                 surface, never the deed): [route-to-mvp], [blockers-and-issues],
+;;                 [critical-next-actions], [maintenance-status],
+;;                 completion-percentage. [position] phase "implementation" has
+;;                 no home under B (see the (status) comment below).
+;;   0-AI-MANIFEST.a2ml (root) -> (manifest)(agent)(policy)(work)
+;;                 per ai-manifest-decision.adoc, OPTION A  [RULED 2026-11-10, owner]
+;;                 Agent seen-set: open, flag-any-unknown (the spec's default; the
+;;                 owner has not ruled ask (ii)). All four agents here are the
+;;                 known CLAUDE/CHATGPT/GEMINI/VIBE set.
+;; NOT translated here, pending a ruling (kept live in 6a2/):
+;;   META.a2ml + ECOSYSTEM.a2ml  — family 2, meta-ecosystem-to-repo-deed.adoc
+;;                                 (PROPOSAL, not yet owner-ruled)
+;; The STATE.a2ml and 0-AI-MANIFEST.a2ml SOURCES stay live: gates still require
+;; them (openssf-compliance, the Must invariant, validate-template.sh, the
+;; arrival-pack generator). They are archived with a tombstone only once those
+;; consumers are rewired, so this deed adds no double-tracked state of its own.
+(repo-deed
+  :schema-version  "1.0.0"
+  :canonical-name  "anytype"
+  :repo-uuid       #u8"gv-clade-index:github.com/hyperpolymath/anytype"
+  :beholding-chora #u5"estate/chora"
+
+  (identity :primary-forge github
+            :owner         "hyperpolymath"
+            :prefixed-name "at-anytype")
+
+  ; PROVISIONAL clade: `at`/`et` are this repo's self-assigned codes, NOT in the
+  ; estate's 12-code closed taxonomy (fv nl rm gv db ap ix dx pt ax gm sc).
+  ; Carried verbatim per the mapping; gv-clade-index must assign/confirm the real
+  ; clade before the CLADE-003/P-5 registry gate can pass (owner + registry act).
+  (clade    :primary   at
+            :secondary (et)
+            :assigned  "2026-06-28"
+            :rationale "at = the anytype kernel (reference implementation); secondary et = it implements systemet (Equality Theory). PROVISIONAL pending gv-clade-index registration.")
+
+  (forges   :github    "hyperpolymath/anytype"
+            :gitlab    "hyperpolymath/anytype"
+            :bitbucket "hyperpolymath/anytype")
+
+  (lineage  :type   standalone
+            :parent "Split out of the combined 'EveryType' draft (2026-06-28): anytype is the kernel half; the theory half is the systemet repo."
+            :born   "2026-06-28")
+
+  ; CLADE.a2ml carries no [status] section, so :phase comes from STATE v1
+  ; [metadata] status = "active", which dedupes into this clause under
+  ; state-v1-decision option B (one lifecycle truth, in the registry surface).
+  ; QUESTION FOR THE OWNER: STATE's separate [position] phase = "implementation"
+  ; uses a different vocabulary (design | implementation | testing | maintenance
+  ; | archived) from this closed lifecycle enum (reserved incubating active
+  ; dormant | merged superseded archived extinct), and maturity has its own
+  ; clause. Option B gives it no home, so it is preserved only in the archive.
+  (status   :phase         active
+            :since         "2026-06-28"
+            :present       #t
+            :aliases       ()
+            :merged-into   ""
+            :superseded-by ""
+            :successors    ()
+            :ended         ""
+            (history
+              (entry :phase active
+                     :since "2026-06-28"
+                     :note  "lifecycle phase active, from STATE v1 [metadata] status (state-v1-decision option B)")))
+
+  (agentic
+            :version "0.1.0" :last-updated "2026-04-11"
+            (permissions  :source       #t
+                          :tests        #t
+                          :docs         #t
+                          :config       #t
+                          :create-files #t)
+            (integrity    :fail-closed                      #t
+                          :require-evidence-per-step        #t
+                          :allow-silent-skip                #f
+                          :require-rerun-after-fix          #t
+                          :release-claim-requires-hard-pass #t)
+            (methodology :instructions-dir ".machine_readable/bot_directives/" :default-mode hybrid))
+
+  (neurosym
+             :version "0.1.0" :last-updated "2026-04-11"
+             (hypatia :scan-enabled  #t
+                      :scan-depth    standard
+                      :report-format "logtalk"))
+
+  (playbook
+            :version "0.1.0" :last-updated "2026-04-11"
+            (skeleton :version              "1.0"
+                      :last-updated         "2026-04-30"
+                      :authority-allowlist  ".machine_readable/root-allow.txt"
+                      :enforcement-workflow ".github/workflows/estate-rules.yml")
+            (deployment) (incident-response) (release-process) (docs-format) (maintenance-operations))
+
+  ; STATE v1 [position] maturity. No :since: STATE carries no date for it, and
+  ; the vocabulary makes :since optional rather than inviting an invented one.
+  (maturity :level experimental)
+
+  ; 0-AI-MANIFEST.a2ml (family 7, option A). Text is verbatim: the agent table
+  ; and the policy rules are estate-greppable constants, so nothing is
+  ; deduplicated or tidied. (The spec's table shows (agent)/(policy)/(work)
+  ; without a (manifest) wrapper, so they sit beside it, not inside it.)
+  (manifest :version "0.1.0"
+            :last-updated "2026-06-28"
+            :project "anytype"
+            :purpose "Reference kernel for systemet (Equality Theory): a parameterised type checker whose discipline is chosen by choosing the L2 resource algebra. 'Pick the algebra, get the discipline.' Implements the theory; pins systemet upstream. Early/scaffolding — no working checker yet.")
+  (agent :name CLAUDE  :role "proofs, compilers, repo-local implementation, CI/CD, formal verification, Rust/Idris2/Zig")
+  (agent :name CHATGPT :role "prose, papers, publication review, standards docs, outreach drafts, letters")
+  (agent :name GEMINI  :role "estate audits, cross-repo sweeps, long-context triage, pattern detection")
+  (agent :name VIBE    :role "UI/frontend, PanLL panels, AffineScript components, theming, rapid prototyping")
+  ; The spec's table writes (policy (rules ("…" "…"))), which deed.abnf rejects:
+  ; a list is only a value after a :keyword. :rules keeps its meaning and order.
+  (policy :rules ("Do not duplicate tasks across sections. If a task needs multiple LLMs, note the handoff."
+                  "Update THIS file during sessions. Do NOT recreate per-repo TODO files."))
+  (work :agent CLAUDE  :task "proofs, compilers, repo-local implementation, CI/CD, formal verification, Rust/Idris2/Zig")
+  (work :agent CHATGPT :task "prose, papers, publication review, standards docs, outreach drafts, letters")
+  (work :agent GEMINI  :task "estate audits, cross-repo sweeps, long-context triage, pattern detection")
+  (work :agent VIBE    :task "UI/frontend, PanLL panels, AffineScript components, theming, rapid prototyping")
+)
