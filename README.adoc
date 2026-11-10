@@ -191,6 +191,26 @@ parameter (the L2 grade algebra), not a fixed feature set:
 * *AffineScript* is one *product profile* of this kernel (`grade = affine + cost`),
   aimed at WASM contracts and edge functions. It is downstream of anytype.
 
+== Relationship to ephapax (design reference only)
+
+* link:https://github.com/hyperpolymath/ephapax[*ephapax*] uses anytype as a
+  *design reference only*: it borrows the idea "pick the algebra, get the
+  discipline". It is not a downstream profile of this kernel.
+* There is *no code or build dependency* in either direction. ephapax does not
+  import, link, vendor or pin anytype, and anytype does not depend on ephapax.
+  This follows the estate kernel ruling (D-2026-10-12: Agda is the family proof
+  kernel and Idris2 is for ABI/runtime only; cross-kernel use is port plus
+  ledger, and nothing is imported across kernels). Under that ruling anytype
+  must not become an ephapax dependency.
+* *No soundness proof exists for this relationship.* Nothing here or in ephapax
+  shows that ephapax's typing discipline is an instance of an anytype grade
+  algebra, or that any anytype result carries over to ephapax. ephapax's v2 plan
+  keeps its {0,1,ω} usage grades separate from an anytype-style single algebra,
+  and records its anytype row as UNVERIFIED.
+* Source: the ephapax v2 survey,
+  link:https://github.com/hyperpolymath/ephapax/blob/main/docs/reports/2026-11-04-v2-survey/EPHAPAX-V2-ARCHITECTURE-AND-PLAN.adoc[`EPHAPAX-V2-ARCHITECTURE-AND-PLAN.adoc`]
+  ("How sibling repositories plug in" and "Cross-repo action list").
+
 == RSR integration
 
 This repository uses the Rhodium Standard Repository pattern: machine-readable

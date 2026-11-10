@@ -87,7 +87,7 @@ jobs:
         run: |
           set -euo pipefail
           idris2 --install anytype.ipkg
-          idris2 --install abi.ipkg
+          idris2 --install src/interface/abi.ipkg
           idris2 --build anytype-tests.ipkg
           ./build/exec/anytype-tests
           idris2 --build anytype-cli.ipkg
