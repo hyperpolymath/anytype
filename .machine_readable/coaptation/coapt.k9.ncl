@@ -43,12 +43,12 @@ K9!
       ".machine_readable/contractiles/bust/Bustfile.a2ml",
     ],
     descriptiles = [
-      ".machine_readable/6a2/CLADE.a2ml",
+      ".machine_readable/descriptiles/CLADE.a2ml",
       "anytype_chora.deed",   # lifecycle + maturity
       "docs/status/JOURNAL.adoc",   # phase
-      ".machine_readable/6a2/ECOSYSTEM.a2ml",
-      ".machine_readable/6a2/AGENTIC.a2ml",
-      ".machine_readable/6a2/anchors/ANCHOR.a2ml",
+      ".machine_readable/descriptiles/ECOSYSTEM.a2ml",
+      ".machine_readable/descriptiles/AGENTIC.a2ml",
+      ".machine_readable/descriptiles/anchors/ANCHOR.a2ml",
     ],
     witness_map = ".machine_readable/coaptation/witness-map.ncl",
     grades = ".machine_readable/coaptation/grades.ncl",

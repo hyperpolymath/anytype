@@ -235,7 +235,7 @@ log_step "Verifying machine-readable metadata"
 
 METADATA_FILES=(
     "docs/status/JOURNAL.adoc"
-    ".machine_readable/6a2/META.a2ml"
+    ".machine_readable/descriptiles/META.a2ml"
 )
 
 for file in "${METADATA_FILES[@]}"; do
