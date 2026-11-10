@@ -23,17 +23,22 @@ either loses real function — keep both.
 Rust-secrets check and a shell-secrets check). An inline TruffleHog job was
 removed earlier as redundant with gitleaks; do not add it again.
 
-== Three workflows are self-contained, not reusable callers
+== Four workflows are self-contained, not reusable callers
 
-`hypatia-scan.yml`, `rust-ci.yml` and `scorecard.yml` follow the workflows of
-the estate template (`hyperpolymath/rsr-template-repo`). Earlier each one
+`hypatia-scan.yml`, `rust-ci.yml`, `scorecard.yml` and `mirror.yml` follow the
+workflows of the estate template (`hyperpolymath/rsr-template-repo`). Earlier each one
 called a reusable workflow of the standards repository. Those calls did not
 start: the Actions rule of this repository refuses a reusable workflow of a
-different owner, and each run failed with no job. Each `uses:` in these three
+different owner, and each run failed with no job. Each `uses:` in these four
 files is now a step-level action, pinned to a full commit SHA.
 
-`governance.yml` and `mirror.yml` are still callers of the standards
-repository. They start only when the Actions rule permits that repository.
+`mirror.yml` checks out the full history and prints the commit. It does not
+push to another forge: a forge that mirrors this repository must pull from
+GitHub. No SSH key secret is passed to a workflow.
+
+`governance.yml` is still a caller of the standards repository (owner
+decision, 2026-11-10): the bundle there has 14 jobs, and the template form has
+1. It starts only when the Actions rule permits that repository.
 
 == SAST tools are complementary, not redundant
 
