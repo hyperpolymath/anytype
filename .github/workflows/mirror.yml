@@ -11,8 +11,17 @@ permissions:
   contents: read
 jobs:
   mirror:
-    uses: metadatastician/standards/.github/workflows/mirror-reusable.yml@571cc734cd69fb846032ec77a662aa8ee4fc32cd
-    secrets: inherit
+    uses: metadatastician/standards/.github/workflows/mirror-reusable.yml@740c9d7d4ed4d1f319a04c92b28218beb75668d7
+    # Only the 7 key secrets that the called workflow declares. `secrets:
+    # inherit` gives every secret of this repository to the called workflow.
+    secrets:
+      GITLAB_SSH_KEY: ${{ secrets.GITLAB_SSH_KEY }}
+      BITBUCKET_SSH_KEY: ${{ secrets.BITBUCKET_SSH_KEY }}
+      CODEBERG_SSH_KEY: ${{ secrets.CODEBERG_SSH_KEY }}
+      SOURCEHUT_SSH_KEY: ${{ secrets.SOURCEHUT_SSH_KEY }}
+      DISROOT_SSH_KEY: ${{ secrets.DISROOT_SSH_KEY }}
+      GITEA_SSH_KEY: ${{ secrets.GITEA_SSH_KEY }}
+      RADICLE_KEY: ${{ secrets.RADICLE_KEY }}
     permissions:
       actions: read
       contents: read

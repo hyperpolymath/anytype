@@ -26,6 +26,8 @@ permissions:
 
 jobs:
   hypatia:
-    uses: metadatastician/standards/.github/workflows/hypatia-scan-reusable.yml@571cc734cd69fb846032ec77a662aa8ee4fc32cd
-
-    secrets: inherit
+    uses: metadatastician/standards/.github/workflows/hypatia-scan-reusable.yml@740c9d7d4ed4d1f319a04c92b28218beb75668d7
+    # Only the secret that the called workflow declares. `secrets: inherit`
+    # gives every secret of this repository to the called workflow.
+    secrets:
+      HYPATIA_SCAN_PAT: ${{ secrets.HYPATIA_SCAN_PAT }}
