@@ -49,7 +49,7 @@ one erased-field projection). They are quarantined in the MANIFEST with
 per-module reasons: the gate requires them to KEEP failing, and flags them
 for promotion if one starts passing. `ABI/Foreign.idr` is the one template
 module that compiles and is gated. Their fate (fix or delete) is tracked in
-`STATE.a2ml` critical-next-actions.
+`docs/status/ROADMAP.adoc` (Next: quarantined template proofs).
 
 == Not proven (open obligations)
 

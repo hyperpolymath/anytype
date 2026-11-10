@@ -36,7 +36,7 @@
       ".machine_readable/6a2/CLADE.a2ml",
       ".machine_readable/6a2/ECOSYSTEM.a2ml",
       ".machine_readable/6a2/AGENTIC.a2ml",
-      ".machine_readable/6a2/STATE.a2ml",
+      "anytype_chora.deed",   # lifecycle + maturity (state-v1-decision option B)
       ".machine_readable/6a2/anchors/ANCHOR.a2ml",
     ],
     estate_common = "hyperpolymath/manifesto@<pinned-sha>",  # DRAFT-unratified today

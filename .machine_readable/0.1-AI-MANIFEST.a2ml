@@ -12,7 +12,7 @@ description: |
   automation scripts.
 
 canonical_locations:
-  state: "6a2/STATE.a2ml"
+  state: "../docs/status/JOURNAL.adoc"
   meta: "6a2/META.a2ml"
   ecosystem: "6a2/ECOSYSTEM.a2ml"
   agentic: "6a2/AGENTIC.a2ml"
