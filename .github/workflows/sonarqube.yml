@@ -22,11 +22,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Report configuration state
+        id: cfg
+        # A job-level `if:` cannot read a secret. This step reads the token
+        # and gives the result to the steps after it. The token is in the
+        # environment of this step and of the scan step only.
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # The script of this step is Bash. `shell: bash` says so in the step:
+        # a default shell or a runner with a different shell cannot change it.
+        shell: bash
+        run: |
+          if [ -z "${SONAR_TOKEN}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SONAR_TOKEN is not configured for this repository - skipping the CI-based scan."
+            echo "SonarCloud automatic analysis (check: 'SonarCloud Code Analysis') is unaffected."
+            echo "To enable this scan: Settings > Secrets and variables > Actions > new secret SONAR_TOKEN."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "SONAR_TOKEN present - running the CI-based scan."
+          fi
       - name: Checkout
+        if: steps.cfg.outputs.configured == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0   # full history for accurate new-code detection
       - name: SonarQube Scan
+        if: steps.cfg.outputs.configured == 'true'
         uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
