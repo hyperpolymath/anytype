@@ -1,3 +1,4 @@
+K9!
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) {{CURRENT_YEAR}} {{AUTHOR}} ({{OWNER}}) <{{AUTHOR_EMAIL}}>
 #
@@ -11,6 +12,18 @@ let methodology_guard = {
   name = "methodology-guard",
   version = "1.0.0",
   description = "Validates that agent work respects declared methodology constraints",
+
+  pedigree = {
+    schema_version = "1.0.0",
+    component_type = "validator:methodology-guard",
+    metadata = {
+      name = "methodology-guard",
+      version = "1.0.0",
+    },
+    security = {
+      leash = 'Yard,
+    },
+  },
 
   checks = {
     divergent_invariant_language = {
