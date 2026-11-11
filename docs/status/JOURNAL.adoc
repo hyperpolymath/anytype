@@ -49,6 +49,22 @@ updated::
   TEA-erasure result (ET-14). Not a code blocker yet.
 | systemet ET-14, OPEN
 | 2026-07-21 (first recorded in STATE v1)
+
+| `coapt-receipt-stale`
+| The coaptation receipt (`.machine_readable/coaptation/receipts/latest.a2ml`)
+  is stale since #87 moved the descriptiles folder: `Mustfile.a2ml` changed,
+  and line 89 of the receipt still has `must@20748d123686`. The receipt is
+  generated, so it was not edited by hand. Run `just coapt`, then
+  `just validate-coapt`. Both need Nickel. No CI job runs this check.
+| owner, or a session that has Nickel
+| 2026-11-10
+
+| `governance-gate-not-running`
+| `governance.yml` calls a reusable workflow of `metadatastician/standards`
+  (14 jobs). The Actions settings of this repository refuse a reusable
+  workflow of that owner, so each run ends at creation with no job.
+| owner: Settings, Actions, General, allow list
+| 2026-11-10
 |===
 
 == Provenance
